@@ -66,7 +66,7 @@ public class MAWCharacterEncoding
 				System.err.println("ERROR: There is no mapping for character \'" + c + "\'");
 				System.err.println("Please contact the author of this encoding and give him the following information.");
 				System.err.println("Version: " + VERSION + "\nCharacter: " + c);
-				return encode(data.substring(0, i) + data.substring(i + 1));
+				continue;
 			}
 			for(int j = 0; j < encodingMapId; j++)
 			{
