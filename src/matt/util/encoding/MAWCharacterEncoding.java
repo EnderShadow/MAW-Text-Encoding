@@ -1,5 +1,8 @@
 package matt.util.encoding;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -9,15 +12,70 @@ import java.util.TreeMap;
 public class MAWCharacterEncoding
 {
 	public static final String VERSION = "v0.0.1";
-	private static final List<TreeMap<Short, Character>> encodings = new ArrayList<TreeMap<Short, Character>>();
-	public static final MAWCharacterEncoding INSTANCE = new MAWCharacterEncoding();
+	private final List<TreeMap<Short, Character>> encodings = new ArrayList<TreeMap<Short, Character>>();
 	
-	private MAWCharacterEncoding()
+	public MAWCharacterEncoding(File mappingFile)
 	{
-		// Registers english as encoding 1
-		addMapping("abcdefghijklmnopqrstuvwxyz+-*/= ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&()_`~[{]};:\'\",<.>?\\|\n\t\b");
-		// Registers japanese as encoding 2
-		addMapping("ーぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ゛゜");
+		if(!registeredFromFile(mappingFile))
+		{
+			// Registers english as encoding 1
+			addMapping("abcdefghijklmnopqrstuvwxyz+-*/= ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&()_`~[{]};:\'\",<.>?\\|\n\t\b");
+			// Registers japanese as encoding 2
+			addMapping("ーぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶ゛゜");
+		}
+	}
+	
+	public MAWCharacterEncoding()
+	{
+		this(null);
+	}
+	
+	/**
+	 * Not sure why I left this in here. Well, this was the default file originally.
+	 */
+	@SuppressWarnings("unused")
+	@Deprecated
+	private boolean registeredFromFile()
+	{
+		return registeredFromFile(new File("MAWMapping.mawenc"));
+	}
+	
+	private boolean registeredFromFile(File file)
+	{
+		try
+		{
+			if(!file.exists())
+				file.createNewFile();
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			String str = "";
+			String s;
+			while((s = br.readLine()) != null)
+				str += "\n" + s;
+			br.close();
+			if(str.replace("\n", "").isEmpty())
+				return false;
+			String[] sa = str.split("\n");
+			for(String string : sa)
+			{
+				if(string != null && !string.isEmpty())
+					addMapping(fixFileMapping(string));
+			}
+		}
+		catch(NullPointerException e)
+		{
+			return false;
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return false;
+		}
+		return true;
+	}
+	
+	private String fixFileMapping(String s)
+	{
+		return s.replace("\\n", "\n").replace("\\b", "\b").replace("\\t", "\t").replace("\\\'", "\'").replace("\\\"", "\"");
 	}
 	
 	public void addMapping(String s)
@@ -101,7 +159,11 @@ public class MAWCharacterEncoding
 				encodingMapId++;
 				i++;
 			}
-			res += encodings.get(encodingMapId).get(data[i]).charValue();
+			try
+			{
+				res += encodings.get(encodingMapId).get(data[i]).charValue();
+			}
+			catch(Exception e) {}
 		}
 		return res;
 	}
