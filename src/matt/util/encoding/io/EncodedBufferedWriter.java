@@ -1,10 +1,12 @@
-package matt.util.encoding;
+package matt.util.encoding.io;
 
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.Writer;
+
+import matt.util.encoding.MAWCharacterEncoding;
 
 public class EncodedBufferedWriter implements Closeable, Flushable
 {

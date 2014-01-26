@@ -1,9 +1,11 @@
-package matt.util.encoding;
+package matt.util.encoding.io;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
+
+import matt.util.encoding.MAWCharacterEncoding;
 
 public class EncodedBufferedReader implements Closeable
 {

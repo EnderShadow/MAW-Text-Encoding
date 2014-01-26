@@ -13,7 +13,7 @@ import matt.util.encoding.exceptions.MapCollisionException;
 
 public class MAWCharacterEncoding
 {
-	public static final String VERSION = "v0.2.0";
+	public static final String VERSION = "v0.3.0";
 	protected final List<TreeMap<Integer, Character>> encodings = new ArrayList<TreeMap<Integer, Character>>();
 	
 	public MAWCharacterEncoding(File mappingFile)
@@ -42,7 +42,7 @@ public class MAWCharacterEncoding
 		return registeredFromFile(new File("MAWMapping.mawenc"));
 	}
 	
-	private boolean registeredFromFile(File file)
+	protected boolean registeredFromFile(File file)
 	{
 		try
 		{
@@ -106,6 +106,31 @@ public class MAWCharacterEncoding
 	}
 	
 	/**
+	 * allows the user to add a mapping where characters are not adjacent
+	 * @param characterMapping an array of characters to add to the map
+	 * @param offset the offset that the map will be added with
+	 */
+	public void addMapping(Character[] characterMapping, int offset)
+	{
+		if(characterMapping.length > 65535)
+			throw new IllegalArgumentException("Cannot have more than 65535 mappings per map.");
+		if(offset < 0)
+			throw new IllegalArgumentException("Offset cannot be less than 0");
+		if(characterMapping.length + offset > 65535)
+			throw new IllegalArgumentException("Offset cannot push the mapping above 65535");
+		
+		TreeMap<Integer, Character> map = new TreeMap<Integer, Character>();
+		for(int i = 0; i < 65535; i++)
+		{
+			if(i < characterMapping.length + offset && i >= offset && characterMapping[i - offset] != null)
+				map.put(i, characterMapping[i - offset]);
+			else
+				map.put(i, null);
+		}
+		encodings.add(map);
+	}
+	
+	/**
 	 * appends the given string to the mapping with the given id
 	 * @param mappingId
 	 * @param map
@@ -149,6 +174,15 @@ public class MAWCharacterEncoding
 	public void appendMapping(int mappingId, String map)
 	{
 		appendMapping(mappingId, map, getMappingSize(mappingId));
+	}
+	
+	public TreeMap<Integer, Character> replaceMapping(int mappingId, TreeMap<Integer, Character> map)
+	{
+		if(mappingId >= encodings.size())
+			throw new NullPointerException("Mapping with id " + mappingId + " does not exist.");
+		if(map == null)
+			throw new IllegalArgumentException("Map cannot be null");
+		return encodings.set(mappingId, map);
 	}
 	
 	public String encode(String data)
